@@ -138,6 +138,6 @@ async def restart(interaction: discord.Interaction):
     await interaction.response.send_message("🔁 Бот перезапускається...", ephemeral=True)
     await log(f"🔁 Бот перезапущено\n👤 {interaction.user.mention}")
     await bot.close()  # Render/хостинг автоматично перезапустить
-
+print("TOKEN існує:", TOKEN is not None)
 # ---------- RUN ----------
 bot.run(TOKEN)
