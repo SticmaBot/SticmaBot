@@ -4,11 +4,6 @@ from discord.ui import View, Button
 import asyncio
 import json
 import os
-from dotenv import load_dotenv
-
-# ---------- ENV ----------
-load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")  # У .env: DISCORD_TOKEN=твой_токен
 
 # ---------- CONFIG ----------
 CONFIG_FILE = "config.json"
@@ -29,14 +24,21 @@ def load_config():
 
 def save_config(data):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, indent=4)
 
 config = load_config()
 
+# ---------- TOKEN ----------
+TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    print("❌ ERROR: DISCORD_TOKEN не знайдено! Перевір Environment Variables на Render")
+    exit(1)
+print("✅ TOKEN знайдено, запускаємо бота...")
+
 # ---------- DISCORD ----------
 intents = discord.Intents.default()
-intents.guilds = True
 intents.message_content = True
+intents.guilds = True
 
 bot = discord.Client(intents=intents)
 tree = app_commands.CommandTree(bot)
@@ -44,11 +46,7 @@ tree = app_commands.CommandTree(bot)
 # ---------- BUTTON ----------
 def event_button(url: str):
     view = View()
-    view.add_item(Button(
-        label="Приєднатись до події",
-        style=ButtonStyle.link,
-        url=url
-    ))
+    view.add_item(Button(label="Приєднатись до події", style=ButtonStyle.link, url=url))
     return view
 
 # ---------- READY ----------
@@ -76,10 +74,7 @@ async def setup(interaction: discord.Interaction,
                 log_channel: discord.TextChannel,
                 role: discord.Role):
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(
-            "❌ Тільки адміністратор може налаштовувати бота",
-            ephemeral=True
-        )
+        await interaction.response.send_message("❌ Тільки адміністратор може налаштовувати бота", ephemeral=True)
         return
 
     config["event_channel_id"] = event_channel.id
@@ -88,10 +83,7 @@ async def setup(interaction: discord.Interaction,
     save_config(config)
 
     await interaction.response.send_message(
-        f"✅ Бот налаштовано\n"
-        f"📢 Події: {event_channel.mention}\n"
-        f"📝 Логи: {log_channel.mention}\n"
-        f"👥 Роль: {role.mention}",
+        f"✅ Бот налаштовано\n📢 Події: {event_channel.mention}\n📝 Логи: {log_channel.mention}\n👥 Роль: {role.mention}",
         ephemeral=True
     )
 
@@ -109,11 +101,7 @@ async def event(interaction: discord.Interaction, name: str, url: str):
     channel = bot.get_channel(config["event_channel_id"])
     role_id = config["role_id"]
 
-    msg = await channel.send(
-        f"📢 **Нова подія**\n{name}\n<@&{role_id}>",
-        view=event_button(url)
-    )
-
+    msg = await channel.send(f"📢 **Нова подія**\n{name}\n<@&{role_id}>", view=event_button(url))
     await interaction.response.send_message("✅ Подію опубліковано", ephemeral=True)
     await log(f"📢 Подія створена: **{name}**\n👤 {interaction.user.mention}")
 
@@ -121,23 +109,11 @@ async def event(interaction: discord.Interaction, name: str, url: str):
 @tree.command(name="shutdown", description="Вимкнути бота (тільки адмін)")
 async def shutdown(interaction: discord.Interaction):
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ Тільки адміністратор", ephemeral=True)
+        await interaction.response.send_message("❌ Тільки адмін", ephemeral=True)
         return
-
     await interaction.response.send_message("🛑 Бот вимикається...", ephemeral=True)
     await log(f"🛑 Бот вимкнено\n👤 {interaction.user.mention}")
     await bot.close()
 
-# ---------- RESTART ----------
-@tree.command(name="restart", description="Перезапустити бота (тільки адмін)")
-async def restart(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ Тільки адміністратор", ephemeral=True)
-        return
-
-    await interaction.response.send_message("🔁 Бот перезапускається...", ephemeral=True)
-    await log(f"🔁 Бот перезапущено\n👤 {interaction.user.mention}")
-    await bot.close()  # Render/хостинг автоматично перезапустить
-print("TOKEN існує:", TOKEN is not None)
 # ---------- RUN ----------
 bot.run(TOKEN)
