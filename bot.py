@@ -59,18 +59,16 @@ class event_button(discord.ui.View):
             participants[self.event_name].append(interaction.user.mention)
             await interaction.response.send_message(f"✅ {interaction.user.display_name}, вас додано!", ephemeral=True)
 
-# Функція видалення (вона має бути ОКРЕМО від кнопок)
 async def delete_event(message, name):
-    await asyncio.sleep(1800)  # 30 хвилин
+    await asyncio.sleep(1800)  # Чекаємо 30 хвилин
     try:
         await message.delete()
         log_channel = bot.get_channel(config["log_channel_id"])
         if log_channel:
             await log_channel.send(f"🗑️ Подія **{name}** автоматично видалена після завершення часу.")
-    except:
-        pass
-    except:
-        pass # Якщо повідомлення вже видалили вручну
+    except Exception as e:
+        print(f"Помилка при видаленні: {e}")
+```
 
 @tree.command(name="shutdown", description="Вимкнути бота (тільки адмін)")
 @app_commands.checks.has_permissions(administrator=True)
