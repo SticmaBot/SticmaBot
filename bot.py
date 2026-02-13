@@ -46,8 +46,6 @@ async def log(message: str):
 class event_button(discord.ui.View):
     def __init__(self, url):
         super().__init__()
-        super().__init__(timeout=None)
-
 @tree.command(name="shutdown", description="Вимкнути бота (тільки адмін)")
 @app_commands.checks.has_permissions(administrator=True)
 async def shutdown(interaction: discord.Interaction):
