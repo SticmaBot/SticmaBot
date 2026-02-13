@@ -46,7 +46,6 @@ async def log(message: str):
 class event_button(discord.ui.View):
     def __init__(self, url):
         super().__init__()
-    class EventView(discord.ui.View):
     def __init__(self, event_name):
         super().__init__(timeout=None)
         self.event_name = event_name
