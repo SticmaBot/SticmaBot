@@ -46,7 +46,29 @@ async def log(message: str):
 class event_button(discord.ui.View):
     def __init__(self, url):
         super().__init__()
-        self.add_item(discord.ui.Butt"🗑️ Подія **{name}** автоматично видалена після завершення часу.")
+    class EventView(discord.ui.View):
+    def __init__(self, event_name):
+        super().__init__(timeout=None)
+        self.event_name = event_name
+
+    @discord.ui.button(label="Я буду!", style=discord.ButtonStyle.green, custom_id="join_event")
+    async def join(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.mention in participants[self.event_name]:
+            await interaction.response.send_message("Ви вже записані!", ephemeral=True)
+        else:
+            participants[self.event_name].append(interaction.user.mention)
+            await interaction.response.send_message(f"✅ {interaction.user.display_name}, вас додано!", ephemeral=True)
+
+# Функція видалення (вона має бути ОКРЕМО від кнопок)
+async def delete_event(message, name):
+    await asyncio.sleep(1800)  # 30 хвилин
+    try:
+        await message.delete()
+        log_channel = bot.get_channel(config["log_channel_id"])
+        if log_channel:
+            await log_channel.send(f"🗑️ Подія **{name}** автоматично видалена після завершення часу.")
+    except:
+        pass
     except:
         pass # Якщо повідомлення вже видалили вручну
 
