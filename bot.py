@@ -46,28 +46,7 @@ async def log(message: str):
 class event_button(discord.ui.View):
     def __init__(self, url):
         super().__init__()
-    def __init__(self, event_name):
         super().__init__(timeout=None)
-        self.event_name = event_name
-
-    @discord.ui.button(label="Я буду!", style=discord.ButtonStyle.green, custom_id="join_event")
-    async def join(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user.mention in participants[self.event_name]:
-            await interaction.response.send_message("Ви вже записані!", ephemeral=True)
-        else:
-            participants[self.event_name].append(interaction.user.mention)
-            await interaction.response.send_message(f"✅ {interaction.user.display_name}, вас додано!", ephemeral=True)
-
-async def delete_event(message, name):
-    await asyncio.sleep(1800)  # Чекаємо 30 хвилин
-    try:
-        await message.delete()
-        log_channel = bot.get_channel(config["log_channel_id"])
-        if log_channel:
-            await log_channel.send(f"🗑️ Подія **{name}** автоматично видалена після завершення часу.")
-    except Exception as e:
-        print(f"Помилка при видаленні: {e}")
-```
 
 @tree.command(name="shutdown", description="Вимкнути бота (тільки адмін)")
 @app_commands.checks.has_permissions(administrator=True)
